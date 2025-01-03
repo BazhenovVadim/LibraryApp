@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Delete</title>
+</head>
+<body>
+Are you really want to delete this book?
+<a href="/books">Go to main page</a>
+<form th:method="DELETE" th:action="@{/books/{id}/delete(id=${book.getId()})}" th:object="${book}">
+  <input type="submit" value="Delete!"/>
+</form>
+</body>
+</html>
