@@ -17,10 +17,10 @@ import java.util.List;
 @RequestMapping("/people")
 public class PersonController {
     private final PeopleDAO peopleDAO;
-    private final BookDAO bookDAO;
+
     @Autowired
-    public PersonController(PeopleDAO peopleDAO, BookDAO bookDAO) {
-        this.bookDAO = bookDAO;
+    public PersonController(PeopleDAO peopleDAO) {
+
         this.peopleDAO = peopleDAO;
     }
 

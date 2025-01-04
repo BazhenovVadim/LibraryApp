@@ -15,7 +15,7 @@ public class Person {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
     @NotEmpty(message = "Full name should be not null")
-    @Column(name = "full_nam")
+    @Column(name = "full_name")
     private String fullName;
     @Min(value = 0, message = "birthdayYear should be gratest tnan 0")
     @Column(name = "birth_year")
