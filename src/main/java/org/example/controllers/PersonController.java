@@ -1,38 +1,49 @@
 package org.example.controllers;
 
 import jakarta.validation.Valid;
-import org.example.DAO.BookDAO;
-import org.example.DAO.PeopleDAO;
+import org.example.models.Book;
 import org.example.models.Person;
+import org.example.services.BookService;
+import org.example.services.PersonService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @Controller
 @RequestMapping("/people")
 public class PersonController {
-    private final PeopleDAO peopleDAO;
+    private final PersonService personService;
+    private final BookService bookService;
 
     @Autowired
-    public PersonController(PeopleDAO peopleDAO) {
-
-        this.peopleDAO = peopleDAO;
+    public PersonController(PersonService personService, BookService bookService) {
+        this.personService = personService;
+        this.bookService = bookService;
     }
 
     @GetMapping()
     public String getPeople(Model model){
-        model.addAttribute("people", peopleDAO.getPeople());
+        model.addAttribute("people", personService.findAll());
         return "people/getPeople";
     }
     @GetMapping("/{id}")
-    public String getPeopleById(@PathVariable("id") int id,  Model model){
-        model.addAttribute("person", peopleDAO.getPeopleById(id));
-        model.addAttribute("books",peopleDAO.getBooksByPersonId(id));
+    public String getPeopleById(@PathVariable("id") int id,  Model model) {
+        Person person = personService.findById(id);
+
+        if (person != null) {
+            List<Book> books = personService.getBooksByPersonId(id);
+            Map<Integer, Boolean> lateBooks = bookService.checkLateDates(books);
+
+            System.out.println("Late Books: " + lateBooks);
+            model.addAttribute("lateBooks", lateBooks);
+            model.addAttribute("person", person);
+            model.addAttribute("books", books);
+        }
         return "people/getPeopleById";
     }
 
@@ -45,13 +56,13 @@ public class PersonController {
         if(bindingResult.hasErrors()){
             return "/people/new";
         }
-        peopleDAO.save(person);
+        personService.save(person);
         return "redirect:/people";
     }
 
     @GetMapping("/{id}/edit")
     public String edit(@PathVariable("id") int id, Model model){
-        model.addAttribute("person", peopleDAO.getPeopleById(id));
+        model.addAttribute("person", personService.findById(id));
         return "people/edit";
     }
 
@@ -61,20 +72,20 @@ public class PersonController {
         if (bindingResult.hasErrors()){
             return "people/edit";
         }
-        peopleDAO.update(id, person);
+        personService.update(id, person);
         return "redirect:/people";
     }
 
     @GetMapping("/{id}/delete")
     public String preDelete(@PathVariable("id") int id, Model model){
-        model.addAttribute("person", peopleDAO.getPeopleById(id));
+        model.addAttribute("person", personService.findById(id));
         return "people/delete";
     }
 
     @DeleteMapping ("/{id}/delete")
     public String delete(@PathVariable("id") int id, @ModelAttribute("person") @Valid Person person,
                          BindingResult bindingResult){
-        peopleDAO.delete(id);
+        personService.delete(id);
         return "redirect:/people";
     }
 }

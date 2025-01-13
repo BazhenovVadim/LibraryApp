@@ -6,13 +6,23 @@
 </head>
 <body>
 
-<div th:each="book : ${books}">
+<div th:each="book : ${booksSorted}">
   <a th:href="@{/books/{id}(id=${book.getId()})}"
      th:text="${book.getName() + ', ' + book.getAuthor() + ', ' + book.getYear() }">Book</a>
 </div>
 
 <br/>
+<div>
+  <a th:if="${booksPage.hasPrevious()}" th:href="@{/books(page=${booksPage.number - 1}, size=${booksPage.size})}">← Назад</a>
+  <span>Страница <span th:text="${booksPage.number + 1}"></span> из <span th:text="${booksPage.totalPages}"></span></span>
+  <a th:if="${booksPage.hasNext()}" th:href="@{/books(page=${booksPage.number + 1}, size=${booksPage.size})}">Вперед →</a>
+</div>
+<br/>
 <hr/>
+<form th:if="${booksPage.hasPrevious()}" th:method="GET" th:action="@{/books}">
+  <input type="hidden" name="size">
+
+</form>
 
 <form th:method="GET" th:action="@{/people}">
   <input type="submit" value="Перейти к пользователям">
@@ -20,6 +30,16 @@
 
 <form th:method="GET" th:action="@{/books/new}">
   <input type="submit" value="Создать новую книгу">
+</form>
+
+<form th:method="GET" th:action="@{/books/search}">
+  <input type="submit" value="Поиск">
+</form>
+
+
+<form th:method="GET" th:action="@{/books}" >
+  <input type="hidden" name="sort_by_year" value="true">
+  <input type="submit" value="Отсортировать по году">
 </form>
 
 </body>

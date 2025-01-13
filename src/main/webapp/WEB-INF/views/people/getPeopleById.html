@@ -27,12 +27,16 @@
   <hr/>
   <b>Список книг: </b>
   <br/>
-  <table th:each="book : ${books}">
-    <tr th:text="${book.getName() + ', ' + book.getAuthor() + ', ' + book.getYear()}">book</tr>
-  </table>
+  <div th:each="book : ${books}">
+    <p th:text="${book.getName() + ', ' + book.getAuthor() + ', ' + book.getYear()}"
+       th:style="${lateBooks[book.id]} ? 'color: red;' : ''">
+    </p>
+    <a th:href="@{/books/{id}(id=${book.getId()})}">Страница книги</a>
+  </div>
   <hr/>
 </div>
 
 
 </body>
 </html>
+

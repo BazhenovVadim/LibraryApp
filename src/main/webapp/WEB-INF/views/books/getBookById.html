@@ -6,7 +6,13 @@
 </head>
 <body>
 
-<p th:text="${book.getName() + ', ' + book.getAuthor() + ', ' + book.getYear()}">VALUE</p>
+<!--<div th:if="${isBookLate == true}">-->
+<!--  <p th:text="${book.getName() + ', ' + book.getAuthor() + ', ' + book.getYear()}" th:style="'color: red;'">VALUE</p>-->
+<!--</div>-->
+<!--<div th:if="${isBookLate == false}">-->
+<!--  <p th:text="${book.getName() + ', ' + book.getAuthor() + ', ' + book.getYear()}">VALUE</p>-->
+<!--</div>-->
+<p th:text="${book.getName() + ', ' + book.getAuthor() + ', ' + book.getYear()}" th:style="${isBookLate} ? 'color: red;' : ''">VALUE</p>
 
 <div th:if="${owner}">
   <span> Книга сейчас у: </span> <span th:text="${owner.getFullName()}">Person name</span>

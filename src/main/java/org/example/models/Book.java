@@ -3,6 +3,7 @@ package org.example.models;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotEmpty;
+import java.time.LocalDateTime;
 @Entity
 @Table(name = "Book")
 public class Book {
@@ -19,16 +20,28 @@ public class Book {
     @Min(value = 0, message = "Year should be gratest tnan 0")
     @Column(name = "year")
     private int year;
+
+    @Column(name = "time_of_taking")
+    private LocalDateTime timeOfTaking;
     @ManyToOne()
     @JoinColumn(name = "person_id", referencedColumnName = "id")
     private Person person;
 
     public Book(){
     }
-    public Book(String name, String author, int year) {
+    public Book(String name, String author, int year, LocalDateTime timeOfTaking) {
         this.name = name;
         this.author = author;
         this.year = year;
+        this.timeOfTaking = timeOfTaking;
+    }
+
+    public LocalDateTime getTimeOfTaking() {
+        return timeOfTaking;
+    }
+
+    public void setTimeOfTaking(LocalDateTime timeOfTaking) {
+        this.timeOfTaking = timeOfTaking;
     }
 
     public Person getPerson() {
@@ -69,5 +82,14 @@ public class Book {
 
     public void setYear(int year) {
         this.year = year;
+    }
+
+    @Override
+    public String toString() {
+        return "Book{" +
+                "name='" + name + '\'' +
+                ", author='" + author + '\'' +
+                ", year=" + year +
+                '}';
     }
 }

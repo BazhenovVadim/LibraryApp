@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Поиск книги</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        /* Стили для подсказок */
+        #suggestions {
+            border: 1px solid #ccc;
+            max-height: 200px;
+            overflow-y: auto;
+            position: absolute;
+            background: white;
+            width: 300px;
+            z-index: 100;
+        }
+
+        #suggestions li {
+            padding: 5px;
+            cursor: pointer;
+        }
+
+        #suggestions li:hover {
+            background-color: #ddd;
+        }
+    </style>
+</head>
+<body>
+
+<!-- Форма поиска книги -->
+<form th:action="@{/books/search}" th:method="GET">
+    <label for="name">Введите название книги:</label>
+    <input type="text" id="name" name="name" required autocomplete="off" />
+    <button type="submit">Поиск</button>
+</form>
+
+<!-- Список подсказок -->
+<ul id="suggestions"></ul>
+
+<hr/>
+
+<!-- Выводим найденную книгу или список книг -->
+<div th:if="${book}">
+    <h2>Результаты поиска:</h2>
+    <p>Название: <span th:text="${book.name}">Название книги</span></p>
+    <p>Автор: <span th:text="${book.author}">Автор книги</span></p>
+    <p>Год издания: <span th:text="${book.year}">Год издания</span></p>
+    <form th:method="GET" th:action="@{/books/{id}(id=${book.id})}">
+        <input type="submit" value="Перейти к книге">
+    </form>
+</div>
+
+<!-- Выводим список книг по префиксу -->
+<div th:if="${books}">
+    <h2>Результаты поиска:</h2>
+    <ul>
+        <li th:each="book : ${books}">
+
+            <p>Название: <span th:text="${book.name}">Название книги</span></p>
+            <p>Автор: <span th:text="${book.author}">Автор книги</span></p>
+            <p>Год издания: <span th:text="${book.year}">Год издания</span></p>
+            <form th:method="GET" th:action="@{/books/{id}(id=${book.id})}">
+                <input type="submit" value="Перейти к книге">
+            </form>
+        </li>
+    </ul>
+</div>
+
+<!-- Сообщение, если книга не найдена -->
+<div th:if="${message}">
+    <p th:text="${message}">Книга не найдена</p>
+</div>
+</body>
+</html>
