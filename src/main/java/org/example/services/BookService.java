@@ -63,11 +63,13 @@ public class BookService {
     @Transactional
     public void assign(int id, Person selectedPerson){
         bookRepository.findById(id).ifPresent(book -> book.setPerson(selectedPerson));
+        bookRepository.findById(id).ifPresent(book -> book.setTimeOfTaking(LocalDateTime.now()));
     }
 
     @Transactional
     public void release(int id){
         bookRepository.findById(id).ifPresent(book -> book.setPerson(null));
+        bookRepository.findById(id).ifPresent(book -> book.setTimeOfTaking(null));
     }
     @Transactional
     public Optional<Person> findBookOwner(int id){
