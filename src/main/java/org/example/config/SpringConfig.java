@@ -11,8 +11,6 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 
-import org.springframework.orm.hibernate5.HibernateTransactionManager;
-import org.springframework.orm.hibernate5.LocalSessionFactoryBean;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
@@ -30,7 +28,7 @@ import java.util.Properties;
 
 @Configuration
 @ComponentScan("org.example")
-@PropertySource("classpath:hibernate.properties")
+@PropertySource("classpath:hibernate.properties.yml")
 @EnableTransactionManagement
 @EnableJpaRepositories("org.example.repositories")
 @EnableWebMvc

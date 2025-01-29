@@ -1,23 +1,25 @@
-package org.example.models;
+package org.example.models.entity;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotEmpty;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.example.models.Person;
 
 @Setter
 @Getter
 @Entity
 @Table(name = "Book")
-public class Book {
-    @Id
-    @Column(name = "id")
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+@NoArgsConstructor
+public class BookEntity extends AbstractJpaPersistable{
+
     @NotEmpty(message = "Name should be not null")
     @Column(name = "name")
     private String name;
@@ -32,6 +34,6 @@ public class Book {
     private LocalDateTime timeOfTaking;
     @ManyToOne()
     @JoinColumn(name = "person_id", referencedColumnName = "id")
-    private Person person;
+    private PersonEntity person;
 
 }

@@ -1,150 +1,111 @@
 package org.example.controllers;
 
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.example.models.Book;
 import org.example.models.Person;
+import org.example.models.dto.BookDto;
+import org.example.models.dto.PersonDto;
 import org.example.services.BookService;
 import org.example.services.PersonService;
+import org.hibernate.ObjectNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
-
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
-@Controller
+@RestController
 @RequestMapping("/books")
+@RequiredArgsConstructor
 public class BookController {
     private final BookService bookService;
     private final PersonService personService;
 
-    @Autowired
-    public BookController(BookService bookService, PersonService personService) {
-        this.bookService = bookService;
-        this.personService = personService;
-    }
-
     @GetMapping()
-    public String getBooks(@RequestParam(value = "sort_by_year", required = false) boolean sortByYear,
-                           @RequestParam(value = "page",  defaultValue = "0") int page,
-                           @RequestParam(value = "size",  defaultValue = "2") int size,
-                           Model model){
-        Page<Book> booksPage = bookService.getBooksPaginated(page, size);
-        model.addAttribute("booksPage", booksPage);
-        model.addAttribute("booksSorted", bookService.findAll(sortByYear));
-        return "books/getBooks";
+    public List<BookDto> getBooks(@RequestParam(value = "sort_by_year", required = false) boolean sortByYear,
+                                  @RequestParam(value = "page", defaultValue = "0") int page,
+                                  @RequestParam(value = "size", defaultValue = "2") int size) {
+//        Page<Book> booksPage = bookService.getBooksPaginated(page, size);
+//        model.addAttribute("booksPage", booksPage);
+//        model.addAttribute("booksSorted", bookService.findAll(sortByYear));
+        return bookService.findAll();
+        //TODO:пагинация и сортировка
     }
 
     @GetMapping("/{id}")
-    public String getBookById(@PathVariable("id") int id,@ModelAttribute("person") Person person,
-                              Model model){
-        model.addAttribute("book", bookService.findById(id));
-        model.addAttribute("isBookLate", bookService.checkLateDate(id));
-        Optional<Person> bookOwner = bookService.findBookOwner(id);
-
-        if (bookOwner.isPresent()){
-            model.addAttribute("owner", bookOwner.get());
-            System.out.println("owner");
-        }
-        else {
-            model.addAttribute("people", personService.findAll());
-            System.out.println("people");
-        }
-        return "books/getBookById";
+    public BookDto getBookById(@PathVariable("id") UUID id, @ModelAttribute("person") Person person) {
+//        model.addAttribute("book", bookService.findById(id));
+//        model.addAttribute("isBookLate", bookService.checkLateDate(id));
+        return bookService.findById(id);
     }
 
-    @GetMapping("/new")
-    public String getForm(@ModelAttribute("book") Book book){
-        return "books/new";
-    }
     @PostMapping()
-    public String createBook(@ModelAttribute("book") @Valid Book book, BindingResult bindingResult) {
-        if(bindingResult.hasErrors()){
-            return "books/new";
-        }
+    public BookDto createBook(@Valid @RequestBody BookDto book, BindingResult bindingResult) {
         bookService.save(book);
-        return "redirect:/books";
-    }
-
-    @GetMapping("/{id}/edit")
-    public String edit(@PathVariable("id") int id, Model model){
-        model.addAttribute("book", bookService.findById(id));
-        return "books/edit";
+        return bookService.save(book);
     }
 
     @PatchMapping("/{id}")
-    public String update(@PathVariable("id") int id,@ModelAttribute("book") @Valid Book book,
-                         BindingResult bindingResult){
-        if (bindingResult.hasErrors()){
-            return "books/edit";
-        }
-        bookService.update(id, book);
-        return "redirect:/books";
+    public BookDto update(@PathVariable("id") UUID id, @Valid @RequestBody BookDto book,
+                          BindingResult bindingResult) {
+        return bookService.update(id, book);
     }
 
-    @GetMapping("/{id}/delete")
-    public String preDelete(@PathVariable("id") int id, Model model){
-        model.addAttribute("book", bookService.findById(id));
-        return "books/delete";
-    }
 
-    @DeleteMapping ("/{id}/delete")
-    public String delete(@PathVariable("id") int id, @ModelAttribute("book") @Valid Book book,
-                         BindingResult bindingResult){
-        bookService.delete(id);
-        return "redirect:/books";
+    @DeleteMapping("/{id}/delete")
+    public BookDto delete(@PathVariable("id") UUID id, @Valid @RequestBody BookDto book,
+                          BindingResult bindingResult) {
+        return bookService.delete(id);
+
     }
 
     @PostMapping("/{id}/release")
-    public String release(@PathVariable("id") int id){
-        bookService.release(id);
-        return "redirect:/books/" + id;
+    public BookDto release(@PathVariable("id") UUID id) {
+        return bookService.release(id);
     }
 
     @PatchMapping("/{id}/assign")
-    public String assign(@PathVariable("id") int id,@ModelAttribute("person") Person selectedPerson){
-        bookService.assign(id, selectedPerson);
-        return "redirect:/books/" + id;
+    public BookDto assign(@PathVariable("id") UUID id, @RequestBody PersonDto selectedPerson) {
+        return bookService.assign(id, selectedPerson);
     }
 
     @GetMapping("/search")
-    public String findBook(@RequestParam(value = "name", required = false) String name, Model model) {
+    public List<BookDto> findBook(@RequestParam(value = "name", required = false) String name) {
 
         if (name != null && !name.isEmpty()) {
             // Сначала пробуем найти книгу по точному совпадению
-            Book book = bookService.findBookByName(name);
+            BookDto book = bookService.findBookByName(name);
             if (book != null) {
-                model.addAttribute("book", book);
+                return new ArrayList<>(List.of(book));
+            }
+            // Если книга не найдена по точному совпадению, ищем книги по префиксу
+            List<BookDto> books = bookService.findBooksByPrefix(name);
+            if (!books.isEmpty()) {
+                return books; // Добавляем список книг
             } else {
-                // Если книга не найдена по точному совпадению, ищем книги по префиксу
-                List<Book> books = bookService.findBooksByPrefix(name);
-                if (!books.isEmpty()) {
-                    model.addAttribute("books", books); // Добавляем список книг
-                } else {
-                    model.addAttribute("message", "Книга не найдена");
-                }
+                throw new ObjectNotFoundException("Book not found", Book.class);
             }
         }
-        return "books/search";
+        return null;
     }
 
     @GetMapping("/autocomplete")
     @ResponseBody
     public List<String> autocomplete(@RequestParam("prefix") String prefix) {
         // Получаем список названий книг, начинающихся с префикса
-        List<Book> books = bookService.findBooksByPrefix(prefix);
+        List<BookDto> books = bookService.findBooksByPrefix(prefix);
         List<String> bookNames = books.stream()
-                .map(Book::getName)
+                .map(BookDto::getName)
                 .collect(Collectors.toList());
         return bookNames;
     }
-
 
 
 }
